@@ -6,12 +6,38 @@ const products = [
   { id: 5, name: "Таёжный IPA", type: "India Pale Ale", category: "craft", description: "Сосновая хвоя, грейпфрут и яркая хмелевая горечь.", price: 430, abv: "6.2% · 0.5 л", tag: "Новинка", image: "assets/beer-ipa.png" },
   { id: 6, name: "Дикий сад", type: "Вишнёвый эль", category: "craft", description: "Спелая вишня, лёгкая кислинка и сухой финиш.", price: 450, abv: "5.4% · 0.5 л", tag: "Лимитка", image: "assets/beer-cherry.png" },
   { id: 7, name: "Нулевой меридиан", type: "Безалкогольный IPA", category: "zero", description: "Полный хмелевой вкус с нотами манго — и никаких компромиссов.", price: 310, abv: "0.4% · 0.5 л", tag: "", image: "assets/beer-zero-ipa.png" },
-  { id: 8, name: "Свободный лагер", type: "Безалкогольный лагер", category: "zero", description: "Свежий, хрустящий и лёгкий — для любого повода.", price: 280, abv: "0.3% · 0.5 л", tag: "", image: "assets/beer-zero-lager.png" }
+  { id: 8, name: "Свободный лагер", type: "Безалкогольный лагер", category: "zero", description: "Свежий, хрустящий и лёгкий — для любого повода.", price: 280, abv: "0.3% · 0.5 л", tag: "", image: "assets/beer-zero-lager.png" },
+  { id: 9, name: "Яблочный сухой", type: "Фермерский сидр", category: "alcohol", description: "Свежие яблоки, лёгкая кислинка и сухой игристый финиш.", price: 360, abv: "5.2% · 0.5 л", tag: "Новинка", image: "assets/drink-cider.png" },
+  { id: 10, name: "Сибирский сет", type: "Набор настоек", category: "alcohol", description: "Клюква и хреновуха — две домашние настойки для яркого вечера.", price: 690, abv: "2 × 100 мл", tag: "Крепкое", image: "assets/drink-tinctures.png" },
+  { id: 11, name: "Таёжное мясо", type: "Говяжьи джерки", category: "food", description: "Вяленая говядина с копчёной паприкой, перцем и розмарином.", price: 390, abv: "120 г", tag: "Хит", image: "assets/food-jerky.png" },
+  { id: 12, name: "Сырная доска", type: "Ассорти сыров", category: "food", description: "Копчёный сыр, выдержанный чеддер, косичка, орехи и мёд.", price: 590, abv: "280 г", tag: "", image: "assets/food-cheese.png" },
+  { id: 13, name: "Большой крендель", type: "Баварский брецель", category: "food", description: "Тёплый солёный крендель с горчицей и сырным соусом.", price: 320, abv: "250 г", tag: "", image: "assets/food-pretzel.png" },
+  { id: 14, name: "Огненные крылья", type: "Куриные крылья", category: "food", description: "Хрустящие крылья в остром соусе с сельдереем и дипом.", price: 520, abv: "350 г", tag: "Острое", image: "assets/food-wings.png" }
 ];
 
 let cart = JSON.parse(localStorage.getItem("beer-cart") || "[]");
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
+
+function initAgeGate() {
+  const gate = $("#ageGate");
+  if (localStorage.getItem("beer-age-confirmed") === "yes") return;
+  gate.classList.add("open");
+  gate.setAttribute("aria-hidden", "false");
+  document.body.classList.add("age-locked");
+}
+
+$("#ageConfirm").addEventListener("click", () => {
+  localStorage.setItem("beer-age-confirmed", "yes");
+  $("#ageGate").classList.remove("open");
+  $("#ageGate").setAttribute("aria-hidden", "true");
+  document.body.classList.remove("age-locked");
+});
+
+$("#ageDeny").addEventListener("click", () => {
+  $("#ageGate").classList.add("denied");
+  $("#ageGateTitle").innerHTML = "Возвращайтесь,<br><em>когда исполнится 18</em>";
+});
 
 function formatPrice(value) {
   return `${value.toLocaleString("ru-RU")} ₽`;
@@ -129,6 +155,7 @@ function showToast(name) {
 
 renderProducts();
 renderCart();
+initAgeGate();
 
 $("#productGrid").addEventListener("click", event => {
   const button = event.target.closest(".buy-button");

@@ -11,6 +11,21 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div class="age-gate" id="ageGate" aria-hidden="true">
+    <div class="age-gate-bg"></div>
+    <section class="age-gate-card" role="dialog" aria-modal="true" aria-labelledby="ageGateTitle">
+      <div class="age-gate-mark">18+</div>
+      <div class="eyebrow"><span></span> Ответственное потребление</div>
+      <h2 id="ageGateTitle">Вам уже<br><em>исполнилось 18?</em></h2>
+      <p>На сайте представлена алкогольная продукция. Подтвердите, что вы достигли совершеннолетия.</p>
+      <div class="age-gate-actions">
+        <button class="button button-primary" id="ageConfirm" type="button">Да, мне есть 18 <span>→</span></button>
+        <button class="age-deny" id="ageDeny" type="button">Нет, мне нет 18</button>
+      </div>
+      <small>Чрезмерное употребление алкоголя вредит вашему здоровью</small>
+    </section>
+  </div>
+
   <div class="age-bar">
     <span>18+</span> Чрезмерное употребление алкоголя вредит вашему здоровью
   </div>
@@ -21,7 +36,7 @@
       <span>Хмель <i>&</i> Солод</span>
     </a>
     <nav class="nav" id="nav">
-      <a href="#catalog">Каталог</a>
+      <a href="#catalog">Меню</a>
       <a href="#offers">Акции</a>
       <a href="#about">О нас</a>
       <a href="#contacts">Контакты</a>
@@ -65,18 +80,20 @@
     <section class="catalog section" id="catalog">
       <div class="section-heading reveal">
         <div>
-          <div class="eyebrow"><span></span> Наша коллекция</div>
-          <h2>Найдите свой <em>вкус</em></h2>
+          <div class="eyebrow"><span></span> Барное меню</div>
+          <h2>Выберите свой <em>вкус</em></h2>
         </div>
-        <p>От лёгкого и освежающего до насыщенного и сложного — каждый сорт сварен небольшим тиражом.</p>
+        <p>Авторское пиво, крепкие настойки и закуски, которые мы подобрали специально к каждому напитку.</p>
       </div>
 
       <div class="filters reveal" role="group" aria-label="Категории пива">
-        <button class="filter active" data-filter="all">Все сорта <span>8</span></button>
+        <button class="filter active" data-filter="all">Всё меню <span>14</span></button>
         <button class="filter" data-filter="light">Светлое <span>2</span></button>
         <button class="filter" data-filter="dark">Тёмное <span>2</span></button>
         <button class="filter" data-filter="craft">Крафтовое <span>2</span></button>
         <button class="filter" data-filter="zero">Безалкогольное <span>2</span></button>
+        <button class="filter" data-filter="alcohol">Другой алкоголь <span>2</span></button>
+        <button class="filter" data-filter="food">Закуски <span>4</span></button>
       </div>
 
       <div class="products" id="productGrid"></div>

@@ -19,6 +19,8 @@ python -m http.server 8000
 - `script.js` — каталог, фильтры, корзина и формы
 - `assets/brewery-hero.png` — главный фирменный визуал
 - `assets/beer-*.png` — отдельные фотографии для каждого сорта
+- `assets/drink-*.png` — фотографии сидра и настоек
+- `assets/food-*.png` — фотографии закусок
 - `assets/brewery-team.png` — фотография команды в пивоварне
 - `api/order.js` — безопасная отправка заказов в Telegram через Vercel
 
