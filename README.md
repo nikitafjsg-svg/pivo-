@@ -20,3 +20,13 @@ python -m http.server 8000
 - `assets/brewery-hero.png` — главный фирменный визуал
 - `assets/beer-*.png` — отдельные фотографии для каждого сорта
 - `assets/brewery-team.png` — фотография команды в пивоварне
+- `api/order.js` — безопасная отправка заказов в Telegram через Vercel
+
+## Telegram-заказы на Vercel
+
+В настройках проекта Vercel добавьте две переменные окружения:
+
+- `TELEGRAM_BOT_TOKEN` — токен, выданный BotFather
+- `TELEGRAM_CHAT_ID` — ID чата, куда должны приходить заказы
+
+После добавления переменных выполните Redeploy проекта.

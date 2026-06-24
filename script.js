@@ -93,6 +93,32 @@ function closeCart() {
   document.body.classList.remove("cart-open", "no-scroll");
 }
 
+function getCartTotal() {
+  return cart.reduce((sum, item) => {
+    const product = item.id === 99
+      ? { price: 1990 }
+      : products.find(product => product.id === item.id);
+    return sum + product.price * item.quantity;
+  }, 0);
+}
+
+function openCheckout() {
+  if (!cart.length) return;
+  closeCart();
+  $("#checkoutTotal").textContent = formatPrice(getCartTotal());
+  $("#checkoutStatus").textContent = "";
+  $("#checkoutModal").classList.add("open");
+  $("#checkoutModal").setAttribute("aria-hidden", "false");
+  document.body.classList.add("no-scroll");
+  setTimeout(() => $("#checkoutForm [name='name']").focus(), 250);
+}
+
+function closeCheckout() {
+  $("#checkoutModal").classList.remove("open");
+  $("#checkoutModal").setAttribute("aria-hidden", "true");
+  document.body.classList.remove("no-scroll");
+}
+
 let toastTimer;
 function showToast(name) {
   $("#toastName").textContent = name;
@@ -138,8 +164,56 @@ $("#cartItems").addEventListener("click", event => {
 
 $("[data-add-set]").addEventListener("click", () => addToCart(99));
 
-$("#checkoutButton").addEventListener("click", () => {
-  alert("Спасибо! Демоверсия заказа готова. Подключите платёжную систему для приёма заказов.");
+$("#checkoutButton").addEventListener("click", openCheckout);
+
+$$("[data-checkout-close]").forEach(button => button.addEventListener("click", closeCheckout));
+
+$("#checkoutForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const button = form.querySelector(".checkout-submit");
+  const status = $("#checkoutStatus");
+  const formData = new FormData(form);
+
+  button.disabled = true;
+  button.innerHTML = "Отправляем…";
+  status.className = "checkout-status";
+  status.textContent = "";
+
+  try {
+    const response = await fetch("/api/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customer: {
+          name: formData.get("name"),
+          phone: formData.get("phone"),
+          address: formData.get("address"),
+          comment: formData.get("comment")
+        },
+        website: formData.get("website"),
+        items: cart.map(item => ({ id: item.id, quantity: item.quantity }))
+      })
+    });
+
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Не удалось отправить заказ");
+
+    status.className = "checkout-status success";
+    status.textContent = `Заказ №${result.orderId} отправлен! Скоро мы вам позвоним.`;
+    cart = [];
+    saveCart();
+    form.reset();
+    setTimeout(closeCheckout, 2600);
+  } catch (error) {
+    status.className = "checkout-status error";
+    status.textContent = error.message === "Failed to fetch"
+      ? "Сайт пока не подключён к Telegram. Проверьте настройки Vercel."
+      : error.message;
+  } finally {
+    button.disabled = false;
+    button.innerHTML = "Отправить заказ <span>→</span>";
+  }
 });
 
 $("#menuButton").addEventListener("click", () => {
@@ -169,5 +243,8 @@ const observer = new IntersectionObserver(entries => {
 $$(".reveal").forEach(element => observer.observe(element));
 
 document.addEventListener("keydown", event => {
-  if (event.key === "Escape") closeCart();
+  if (event.key === "Escape") {
+    closeCart();
+    closeCheckout();
+  }
 });
