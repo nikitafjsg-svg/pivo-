@@ -3,7 +3,7 @@ const catalog = {
   2: { name: "Белая ночь", price: 320 },
   3: { name: "Старый порт", price: 390 },
   4: { name: "Чёрный мёд", price: 410 },
-  5: { name: "Таёжный IPA", price: 430 },
+  5: { name: "Таёжный IPA", price: 360 },
   6: { name: "Дикий сад", price: 450 },
   7: { name: "Нулевой меридиан", price: 310 },
   8: { name: "Свободный лагер", price: 280 },
@@ -46,9 +46,11 @@ export default async function handler(request, response) {
   const phone = clean(customer.phone, 30);
   const address = clean(customer.address, 180);
   const comment = clean(customer.comment, 500);
+  const deliveryDate = clean(customer.deliveryDate, 20);
+  const deliveryTime = clean(customer.deliveryTime, 30);
 
-  if (name.length < 2 || phone.length < 6 || address.length < 5) {
-    return response.status(400).json({ error: "Проверьте имя, телефон и адрес" });
+  if (name.length < 2 || phone.length < 6 || address.length < 5 || !deliveryDate || !deliveryTime) {
+    return response.status(400).json({ error: "Проверьте контакты, адрес, дату и время доставки" });
   }
 
   if (!Array.isArray(body.items) || body.items.length === 0 || body.items.length > 30) {
@@ -60,8 +62,24 @@ export default async function handler(request, response) {
   const lines = [];
 
   for (const item of body.items) {
-    const product = catalog[Number(item.id)];
     const quantity = Math.floor(Number(item.quantity));
+    if (Number(item.id) === 98) {
+      const selections = Array.isArray(item.selections) ? item.selections.map(Number) : [];
+      if (selections.length !== 6 || selections.some(id => id < 1 || id > 8 || !catalog[id])) {
+        return response.status(400).json({ error: "В собранном наборе обнаружена ошибка" });
+      }
+      if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
+        return response.status(400).json({ error: "Неверное количество наборов" });
+      }
+      const packPrice = Math.round(selections.reduce((sum, id) => sum + catalog[id].price, 0) * .9);
+      const packNames = selections.map(id => catalog[id].name).join(", ");
+      total += packPrice * quantity;
+      itemCount += 6 * quantity;
+      lines.push(`• <b>Свой набор из 6</b> × ${quantity} — ${(packPrice * quantity).toLocaleString("ru-RU")} ₽\n  ${escapeHtml(packNames)}`);
+      continue;
+    }
+
+    const product = catalog[Number(item.id)];
     if (!product || !Number.isInteger(quantity) || quantity < 1 || quantity > 50) {
       return response.status(400).json({ error: "В корзине обнаружен неверный товар" });
     }
@@ -82,6 +100,7 @@ export default async function handler(request, response) {
     `👤 <b>Имя:</b> ${escapeHtml(name)}`,
     `📞 <b>Телефон:</b> ${escapeHtml(phone)}`,
     `📍 <b>Адрес:</b> ${escapeHtml(address)}`,
+    `📅 <b>Доставка:</b> ${escapeHtml(deliveryDate)}, ${escapeHtml(deliveryTime)}`,
     comment ? `💬 <b>Комментарий:</b> ${escapeHtml(comment)}` : ""
   ].filter(Boolean).join("\n");
 
